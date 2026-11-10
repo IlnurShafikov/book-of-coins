@@ -1,0 +1,5 @@
+# First column is the ID of the symbol
+# First row is the count of symbols to get the payouts
+# Other values for each id are the variables of payouts for the symbol
+-,1,2,3,4,5
+10,0,0,20,200,2000

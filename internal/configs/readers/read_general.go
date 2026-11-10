@@ -6,6 +6,7 @@ import (
 	"github.com/IlnurShafikov/book-of-coins/internal/configs"
 	"github.com/IlnurShafikov/book-of-coins/internal/configs/readers/common"
 	"github.com/IlnurShafikov/book-of-coins/internal/tools"
+	"github.com/IlnurShafikov/slot-engine/pkg/paytable"
 	"github.com/IlnurShafikov/slot-engine/pkg/tools/reader"
 )
 
@@ -28,7 +29,7 @@ const (
 func Read(reader *reader.Adapter) (*configs.GeneralConfig, error) {
 	generalPath := tools.NewPathBuilder(generalPrefix)
 
-	paytable, err := common.ReadPaytable(reader, generalPath)
+	linePaytable, scatterPaytable, err := readPayTables(reader, generalPath)
 	if err != nil {
 		return nil, fmt.Errorf("read paytable: %w", err)
 	}
@@ -47,6 +48,30 @@ func Read(reader *reader.Adapter) (*configs.GeneralConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read multipliers: %w", err)
 	}
+	fsInitCounter, err := common.ReadFsInitCounter(reader, generalPath)
+	if err != nil {
+		return nil, fmt.Errorf("read fs init counter: %w", err)
+	}
+
+	coinIntervals, err := common.ReadCoinIntervals(reader, generalPath)
+	if err != nil {
+		return nil, fmt.Errorf("read coin intervals: %w", err)
+	}
+
+	grandRules, err := common.ReadGrandRules(reader, generalPath)
+	if err != nil {
+		return nil, fmt.Errorf("read grand rules: %w", err)
+	}
+
+	jpTypes, err := common.ReadJpTypes(reader, generalPath)
+	if err != nil {
+		return nil, fmt.Errorf("read jp types: %w", err)
+	}
+
+	expandMinCount, err := common.ReadExpandMinCount(reader, generalPath)
+	if err != nil {
+		return nil, fmt.Errorf("read expand min count: %w", err)
+	}
 
 	volatility, err := common.ReadVolatility(reader, generalPath)
 	if err != nil {
@@ -54,10 +79,44 @@ func Read(reader *reader.Adapter) (*configs.GeneralConfig, error) {
 	}
 
 	return &configs.GeneralConfig{
-		PayTable:       paytable,
-		Multipliers:    multipliers,
-		SymbolsOnReels: symbolsOnReel,
-		WinLines:       winLines,
-		Volatility:     volatility,
+		PayTable:        linePaytable,
+		ScatterPayTable: scatterPaytable,
+		Multipliers:     multipliers,
+		SymbolsOnReels:  symbolsOnReel,
+		WinLines:        winLines,
+		JpTypes:         jpTypes,
+		ExpandMinCount:  expandMinCount,
+		FsInitCounter:   fsInitCounter,
+		RsInitCounter:   coinIntervals,
+		Volatility:      volatility,
+		GrandRules:      grandRules,
 	}, nil
+}
+
+// readPayTables reads and parses both regular and scatter paytable configurations.
+// It loads the main paytable for line wins and a separate paytable for scatter wins.
+//
+// Parameters:
+//   - reader: CSV file adapter for reading configuration files
+//   - generalPath: path builder pointing to the general configuration directory
+//
+// Returns:
+//   - paytable: pointer to PayTable for regular line wins
+//   - scatterPaytable: pointer to PayTable for scatter wins
+//   - err: error if reading or parsing fails
+func readPayTables(
+	reader *reader.Adapter,
+	generalPath *tools.PathBuilder,
+) (payTable, scatterPaytable *paytable.PayTable, err error) {
+	payTable, err = common.ReadPaytable(reader, generalPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read paytable: %w", err)
+	}
+
+	scatterPaytable, err = common.ReadScatterPaytable(reader, generalPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read scatter paytable: %w", err)
+	}
+
+	return payTable, scatterPaytable, nil
 }

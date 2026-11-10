@@ -1,0 +1,7 @@
+# Re Spins coin count group
+# The First column of group id
+# Other values is the ranges count of coins dropped
+1,6,8
+2,9,10
+3,11,12
+4,13,15

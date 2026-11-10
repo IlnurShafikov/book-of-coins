@@ -1,15 +1,23 @@
 package configs
 
 import (
+	"github.com/IlnurShafikov/book-of-coins/internal/entities/intervals"
 	"github.com/IlnurShafikov/slot-engine/pkg/lines"
 	"github.com/IlnurShafikov/slot-engine/pkg/paytable"
+	"github.com/IlnurShafikov/slot-engine/pkg/tools/fscounter"
 )
 
 // GeneralConfig holds the general game configuration that is shared across all game modes.
 // It includes payout tables and various multipliers used throughout the game.
 type GeneralConfig struct {
 	// PayTable contains symbol payouts and payout ranges for the game
-	PayTable *paytable.PayTable
+	PayTable        *paytable.PayTable
+	ScatterPayTable *paytable.PayTable
+	GrandRules      *GrandRules
+	JpTypes         map[uint64]int
+	ExpandMinCount  map[int]int
+	FsInitCounter   fscounter.FSInitCounter
+	RsInitCounter   intervals.Intervals
 
 	// Multipliers contains various multiplier configurations (cost, max win, etc.)
 	Multipliers *MultipliersConfigs
@@ -22,6 +30,12 @@ type GeneralConfig struct {
 
 	// WinLines defines the cell-position patterns that form paying line combinations.
 	WinLines lines.Lines
+}
+
+type GrandRules struct {
+	CoinCountToGrand int
+	GrandJpType      int
+	GrandWin         uint64
 }
 
 // MultipliersConfigs contains all multiplier-related configuration values.

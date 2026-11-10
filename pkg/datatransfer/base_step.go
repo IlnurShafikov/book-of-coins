@@ -67,7 +67,7 @@ func buildBaseStep(
 	step *result.Base, cost, betValue uint64, initFsCount, initRsCount uint32,
 ) (*baseDto.Step, error) {
 	// Transform the initial board state before any modifications
-	symbols, err := TransformSymbols(step.Board, betValue)
+	symbols, err := TransformSymbols(step.BoardResult().Board, betValue)
 	if err != nil {
 		return nil, fmt.Errorf("transform before symbols: %w", err)
 	}

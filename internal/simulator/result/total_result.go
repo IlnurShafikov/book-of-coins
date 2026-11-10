@@ -7,25 +7,43 @@ package result
 // It is populated by the parser package as each round result is processed.
 type Result struct {
 	// BaseWinRanges tracks the distribution of base-phase total wins.
-	BaseWinRanges *WinRanges
+	BaseWinRanges       *WinRanges
+	FreeWinRanges       *WinRanges
+	BaseReSpinWinRanges *WinRanges
+	FreeReSpinWinRanges *WinRanges
 
-	base *BaseGame
+	base   *BaseGame
+	free   *FreeGame
+	respin *RespinGame
 
-	positiveBets  *PositiveBets
-	xi            *Xi
-	maxTotalWin   uint64
-	maxWinReached uint64
+	positiveBets               *PositiveBets
+	baseGamePositiveBets       *PositiveBets
+	freeGamePositiveBets       *PositiveBets
+	freeReSpinGamePositiveBets *PositiveBets
+	baseReSpinGamePositiveBets *PositiveBets
+	xi                         *Xi
+	maxTotalWin                uint64
+	maxWinReached              uint64
 }
 
 // New creates a new Result with all counters zeroed and win-range buckets initialised.
 func New(roundCost uint64, simpleCostMultiplier int) *Result {
 	return &Result{
-		base:          newBaseGame(),
-		positiveBets:  newPositiveBets(),
-		xi:            newXi(roundCost),
-		maxTotalWin:   0,
-		maxWinReached: 0,
-		BaseWinRanges: NewWinRanges(simpleCostMultiplier),
+		base:                       newBaseGame(),
+		free:                       newFreeGame(),
+		respin:                     newRespinGame(),
+		positiveBets:               newPositiveBets(),
+		baseGamePositiveBets:       newPositiveBets(),
+		freeGamePositiveBets:       newPositiveBets(),
+		freeReSpinGamePositiveBets: newPositiveBets(),
+		baseReSpinGamePositiveBets: newPositiveBets(),
+		xi:                         newXi(roundCost),
+		maxTotalWin:                0,
+		maxWinReached:              0,
+		BaseWinRanges:              NewWinRanges(simpleCostMultiplier),
+		FreeWinRanges:              NewWinRanges(simpleCostMultiplier),
+		BaseReSpinWinRanges:        NewWinRanges(simpleCostMultiplier),
+		FreeReSpinWinRanges:        NewWinRanges(simpleCostMultiplier),
 	}
 }
 
@@ -33,6 +51,8 @@ func New(roundCost uint64, simpleCostMultiplier int) *Result {
 // Used by the parallel runner to combine per-worker accumulators.
 func (r *Result) Merge(other *Result) {
 	r.base.Merge(other.base)
+	r.free.Merge(other.free)
+	r.respin.Merge(other.respin)
 	r.positiveBets.AddN(other.positiveBets.GetSpins())
 	r.xi.AddSum(other.xi.Sum())
 	r.maxWinReached += other.maxWinReached
@@ -42,10 +62,17 @@ func (r *Result) Merge(other *Result) {
 	}
 
 	r.BaseWinRanges.Merge(other.BaseWinRanges)
+	r.FreeWinRanges.Merge(other.FreeWinRanges)
+	r.BaseReSpinWinRanges.Merge(other.BaseReSpinWinRanges)
+	r.FreeReSpinWinRanges.Merge(other.FreeReSpinWinRanges)
 }
 
 // Base returns the base game statistics collector.
 func (r *Result) Base() *BaseGame { return r.base }
+
+func (r *Result) Free() *FreeGame { return r.free }
+
+func (r *Result) ReSpin() *RespinGame { return r.respin }
 
 // Xi returns the Xi statistics tracker.
 func (r *Result) Xi() *Xi { return r.xi }
@@ -55,6 +82,18 @@ func (r *Result) MaxTotalWin() uint64 { return r.maxTotalWin }
 
 // PositiveBets returns the positive bets statistics collector.
 func (r *Result) PositiveBets() *PositiveBets { return r.positiveBets }
+
+func (r *Result) BasePositiveBets() *PositiveBets { return r.baseGamePositiveBets }
+
+func (r *Result) FreePositiveBets() *PositiveBets { return r.freeGamePositiveBets }
+
+func (r *Result) FreeReSpinPositiveBets() *PositiveBets {
+	return r.freeReSpinGamePositiveBets
+}
+
+func (r *Result) BaseReSpinPositiveBets() *PositiveBets {
+	return r.baseReSpinGamePositiveBets
+}
 
 // AddMaxTotalWin updates the maximum total win if the provided win amount is greater.
 func (r *Result) AddMaxTotalWin(win uint64) {
