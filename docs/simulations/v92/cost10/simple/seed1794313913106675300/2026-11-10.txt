@@ -1,0 +1,73 @@
+Game Mod = simple
+RTP Version = 92
+
+Main seed 1794313913106675300
+Started at 2026-11-10T13:31:53+01:00
+Finished at 2026-11-10T13:37:23+01:00
+Rounds 100000000
+
+TOTAL RTP = 0.92307048
+
+BASE RTP = 0.578818125
+	By anywhere wins = 0.578818125
+	Free games triggered = 529959
+	All free game steps = 5447360
+	Respin games triggered = 303277
+	All Respin game steps = 2731440
+
+FS RTP = 0.214259815
+	By anywhere wins = 0.214259815
+	Respin games triggered = 60379
+	All Respin game steps = 520450
+
+RS RTP = 0.12999254
+	Form Base RTP = 0.08142107
+	Form Base Retriggers 745039
+	Retriggers from Base steps count = 1518359
+	Form Free RTP = 0.04857147
+	Form Free Retriggers = 136508
+	Retriggers from Free steps count = 279104
+
+SD = 9.169529208142267
+VI = 17.971947003146926
+
+MaxWin reached count = 0
+Max total win = 6148x
+Max total win = 61480
+
+Steps with wins = 36771222
+Hit rate = 0.36771222
+
+
+Only Base Phase StepWin ranges
+Win Range          | Phase Count   | Once In    | RTP      |
+[0x-0x)            | 63500140      | 1.57       | 0.0000   |
+[0.01x-0.05x)      | 0             | +Inf       | 0.0000   |
+[0.05x-0.1x)       | 0             | +Inf       | 0.0000   |
+[0.1x-0.2x)        | 0             | +Inf       | 0.0000   |
+[0.2x-0.4x)        | 0             | +Inf       | 0.0000   |
+[0.4x-0.6x)        | 0             | +Inf       | 0.0000   |
+[0.6x-0.8x)        | 0             | +Inf       | 0.0000   |
+[0.8x-1x)          | 0             | +Inf       | 0.0000   |
+[1x-1.5x)          | 21194425      | 4.72       | 0.1060   |
+[1.5x-2x)          | 0             | +Inf       | 0.0000   |
+[2x-2.5x)          | 4870704       | 20.53      | 0.0487   |
+[2.5x-5x)          | 3454241       | 28.95      | 0.0597   |
+[5x-10x)           | 4925934       | 20.30      | 0.1580   |
+[10x-25x)          | 1597855       | 62.58      | 0.1302   |
+[25x-50x)          | 427275        | 234.04     | 0.0589   |
+[50x-100x)         | 20448         | 4890.45    | 0.0068   |
+[100x-200x)        | 2148          | 46554.93   | 0.0014   |
+[200x-300x)        | 5978          | 16728.00   | 0.0065   |
+[300x-400x)        | 29            | 3448275.86 | 0.0000   |
+[400x-500x)        | 575           | 173913.04  | 0.0012   |
+[500x-1000x)       | 39            | 2564102.56 | 0.0001   |
+[1000x-1500x)      | 209           | 478468.90  | 0.0011   |
+[1500x-2000x)      | 0             | +Inf       | 0.0000   |
+[2000x-3000x)      | 0             | +Inf       | 0.0000   |
+[3000x-4000x)      | 0             | +Inf       | 0.0000   |
+[4000x-5000x)      | 0             | +Inf       | 0.0000   |
+[5000x-7000x)      | 0             | +Inf       | 0.0000   |
+[7000x-10000x)     | 0             | +Inf       | 0.0000   |
+[10000x-15000x)    | 0             | +Inf       | 0.0000   |
+

@@ -126,7 +126,18 @@ func readGameMod(
 		return nil, fmt.Errorf("read base config: %w", err)
 	}
 
-	gameMod := game.NewMod(basePhase, costMultiplier, generalCfg.MaxWinLimit())
+	freePhase, err := readFreePhase(csvReader, modPath, generalCfg)
+	if err != nil {
+		return nil, fmt.Errorf("read free config: %w", err)
+	}
+
+	reSpinPhase, err := readReSpinPhase(csvReader, modPath, generalCfg)
+	if err != nil {
+		return nil, fmt.Errorf("read re spin config: %w", err)
+	}
+
+	gameMod := game.NewMod(
+		basePhase, freePhase, reSpinPhase, costMultiplier, generalCfg.MaxWinLimit())
 
 	return gameMod, nil
 }

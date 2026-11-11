@@ -23,7 +23,7 @@ func TestGameManager_GetRoundResult(t *testing.T) {
 	gameManager, err := manager.NewGameManager()
 	require.NoError(t, err)
 
-	for range 1000 {
+	for range 100000 {
 		spinRes, err := gameManager.GetRoundResult(
 			context.Background(), rules.SimpleModID, rules.EmptyFeatureID, rtp96, seed(), bet)
 		require.NoError(t, err)

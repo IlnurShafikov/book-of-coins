@@ -4,6 +4,7 @@ package parser
 
 import (
 	resp "github.com/IlnurShafikov/book-of-coins/internal/entities/result"
+	"github.com/IlnurShafikov/book-of-coins/internal/entities/result/events"
 	"github.com/IlnurShafikov/book-of-coins/internal/simulator/result"
 )
 
@@ -27,27 +28,149 @@ func (rp *RoundParser) MergeResult(other *result.Result) {
 
 // Parse processes a complete round result and updates simulation statistics
 func (rp *RoundParser) Parse(roundResult *resp.Round) error {
-	totalBaseWin := rp.parseBasePhase(roundResult.BasePhase)
+	var (
+		totalRoundWin               uint64
+		totalFreeWin                uint64
+		totalRespinFromFreeTotalWin uint64
+	)
 
-	roundTotalWin := totalBaseWin
+	totalBaseWin, totalRespinFromBaseWin := rp.parseBasePhase(roundResult.BasePhase)
 
-	rp.updateRoundStatistics(roundTotalWin)
+	if len(roundResult.FreePhase) > 0 {
+		totalFreeWin, totalRespinFromFreeTotalWin = rp.parseFreePhase(roundResult.FreePhase)
+
+		rp.res.Base().AddFreeGameSteps(len(roundResult.FreePhase))
+	}
+
+	totalRoundWin = totalBaseWin + totalFreeWin +
+		totalRespinFromBaseWin + totalRespinFromFreeTotalWin
+
+	rp.updateRoundStatistics(totalRoundWin)
 
 	return nil
 }
 
 // parseBasePhase processes base game phase results
-func (rp *RoundParser) parseBasePhase(baseResult *resp.Base) uint64 {
-	baseTotalWin := baseResult.TotalWin()
+func (rp *RoundParser) parseBasePhase(
+	baseResult *resp.Base,
+) (baseTotalWin, totalRespinWin uint64) {
+	baseTotalWin = baseResult.TotalWin()
 
 	rp.res.Base().AddWins(baseTotalWin)
 	rp.res.BaseWinRanges.AddWinRange(baseTotalWin)
+
+	if baseTotalWin > 0 {
+		rp.res.BasePositiveBets().Add()
+	}
 
 	if baseResult.MaxWinReached() {
 		rp.res.AddMaxWinReached()
 	}
 
-	return baseTotalWin
+	if len(baseResult.ReSpins) > 0 {
+		totalRespinWin = rp.parseRespinPhaseFromBase(baseResult.ReSpins)
+		rp.res.BaseReSpinPositiveBets().Add()
+		rp.res.BaseReSpinWinRanges.AddWinRange(totalRespinWin)
+		rp.res.Base().AddRespinGameSteps(len(baseResult.ReSpins))
+	}
+
+	return baseTotalWin, totalRespinWin
+}
+
+func (rp *RoundParser) parseRespinPhaseFromFree(respinSteps []*resp.ReSpin) uint64 {
+	return rp.parseRespinPhase(
+		respinSteps,
+		rp.processSingleRespinStepFromFree,
+	)
+}
+
+func (rp *RoundParser) parseFreePhase(
+	freeSteps []*resp.Free,
+) (totalFreeWin, respinTotalWin uint64) {
+	for _, freeStep := range freeSteps {
+		fsStepWin, respinTotalWinInFs := rp.processSingleFreeStep(freeStep)
+		totalFreeWin += fsStepWin
+		respinTotalWin += respinTotalWinInFs
+	}
+
+	rp.res.FreeWinRanges.AddWinRange(totalFreeWin)
+	rp.res.FreeReSpinWinRanges.AddWinRange(respinTotalWin)
+
+	if totalFreeWin > 0 {
+		rp.res.FreePositiveBets().Add()
+	}
+
+	if respinTotalWin > 0 {
+		rp.res.FreeReSpinPositiveBets().Add()
+	}
+
+	return totalFreeWin, respinTotalWin
+}
+
+func (rp *RoundParser) processSingleFreeStep(
+	freeResult *resp.Free,
+) (stepWin, respinTotalWin uint64) {
+	stepWin = freeResult.StepWin()
+
+	rp.res.Free().AddWins(stepWin)
+
+	if freeResult.MaxWinReached() {
+		rp.res.AddMaxWinReached()
+	}
+
+	if len(freeResult.ReSpins) > 0 {
+		respinTotalWin = rp.parseRespinPhaseFromFree(freeResult.ReSpins)
+		rp.res.Free().AddRespinGameSteps(len(freeResult.ReSpins))
+	}
+
+	return stepWin, respinTotalWin
+}
+
+func (rp *RoundParser) parseRespinPhaseFromBase(respinSteps []*resp.ReSpin) uint64 {
+	return rp.parseRespinPhase(
+		respinSteps,
+		rp.processSingleRespinStepFromBase,
+	)
+}
+
+func (rp *RoundParser) parseRespinPhase(
+	respinSteps []*resp.ReSpin,
+	processStep func(*resp.ReSpin) uint64,
+) uint64 {
+	var totalRespinWin uint64
+
+	for _, respinStep := range respinSteps {
+		stepWin := processStep(respinStep)
+		totalRespinWin += stepWin
+	}
+
+	return totalRespinWin
+}
+
+func (rp *RoundParser) processSingleRespinStepFromBase(respinResult *resp.ReSpin) uint64 {
+	stepWin := respinResult.StepWin()
+
+	rp.res.ReSpin().AddWinsFromBase(stepWin)
+	rp.res.ReSpin().AddReTriggersCountFromBase(respinResult.ReTriggers())
+
+	if respinResult.MaxWinReached() {
+		rp.res.AddMaxWinReached()
+	}
+
+	return stepWin
+}
+
+func (rp *RoundParser) processSingleRespinStepFromFree(respinResult *resp.ReSpin) uint64 {
+	stepWin := respinResult.StepWin()
+
+	rp.res.ReSpin().AddWinsFromFree(stepWin)
+	rp.res.ReSpin().AddReTriggersCountFromFree(respinResult.ReTriggers())
+
+	if respinResult.MaxWinReached() {
+		rp.res.AddMaxWinReached()
+	}
+
+	return stepWin
 }
 
 // updateRoundStatistics updates overall round statistics
@@ -62,4 +185,21 @@ func (rp *RoundParser) updateRoundStatistics(totalWin uint64) {
 // GetResult returns the accumulated simulation results
 func (rp *RoundParser) GetResult() *result.Result {
 	return rp.res
+}
+
+func parseScatterWin(baseEvents []events.Event) uint64 {
+	if len(baseEvents) == 0 {
+		return 0
+	}
+
+	for _, event := range baseEvents {
+		winEvent, ok := event.(*events.WinsEvent)
+		if !ok || len(winEvent.AnyWhereWins) == 0 {
+			continue
+		}
+
+		return winEvent.AnyWhereWins[0].Payout
+	}
+
+	return 0
 }

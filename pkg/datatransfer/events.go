@@ -32,6 +32,12 @@ func transformSingleEvent(curEvent events.Event, betValue uint64) error {
 	switch curEvent.EventType() {
 	case events.WinsType:
 		return transformWinEvent(curEvent, betValue)
+	case events.CollectCoinType:
+		return transfomCollectCoinEvent(curEvent, betValue)
+	case events.GrandWinType:
+		return transfomGrandWinEvent(curEvent, betValue)
+	case events.ExpandSymbolType:
+		return nil
 	default:
 		return ErrInvalidEventType
 	}
@@ -46,14 +52,42 @@ func transformSingleEvent(curEvent events.Event, betValue uint64) error {
 // Returns:
 //   - error if the event is not the correct type
 func transformWinEvent(curEvent events.Event, betValue uint64) error {
-	winEvent, ok := curEvent.(*events.LineWinsEvent)
+	winEvent, ok := curEvent.(*events.WinsEvent)
 	if !ok {
 		return ErrInvalidEventType
 	}
 
-	for i := range winEvent.Lines {
-		winEvent.Lines[i].Payout *= betValue
+	for i := range winEvent.LineWins {
+		winEvent.LineWins[i].Payout *= betValue
 	}
+
+	for i := range winEvent.AnyWhereWins {
+		winEvent.AnyWhereWins[i].Payout *= betValue
+	}
+
+	return nil
+}
+
+func transfomCollectCoinEvent(curEvent events.Event, betValue uint64) error {
+	collectCoinEvent, ok := curEvent.(*events.CollectCoinEvent)
+	if !ok {
+		return ErrInvalidEventType
+	}
+
+	for i := range collectCoinEvent.Coins {
+		collectCoinEvent.Coins[i].Value *= betValue
+	}
+
+	return nil
+}
+
+func transfomGrandWinEvent(curEvent events.Event, betValue uint64) error {
+	grandWinEvent, ok := curEvent.(*events.GrandWinEvent)
+	if !ok {
+		return ErrInvalidEventType
+	}
+
+	grandWinEvent.Value *= betValue
 
 	return nil
 }

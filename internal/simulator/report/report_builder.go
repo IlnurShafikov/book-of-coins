@@ -28,24 +28,31 @@ const (
 	HeaderFinishedAt = "Finished at "
 	HeaderRounds     = "Rounds "
 
-	SectionTotalRTP = "TOTAL RTP = "
-	SectionBaseRTP  = "BASE RTP = "
-	SectionFreeRTP  = "FS RTP = "
-	SectionSD       = "SD = "
-	SectionVI       = "VI = "
+	SectionTotalRTP  = "TOTAL RTP = "
+	SectionBaseRTP   = "BASE RTP = "
+	SectionFreeRTP   = "FS RTP = "
+	SectionRespinRTP = "RS RTP = "
+	SectionSD        = "SD = "
+	SectionVI        = "VI = "
 
-	LabelByWins         = "By anywhere wins = "
-	LabelFreeTriggered  = "Free games triggered = "
-	LabelAllFreeSteps   = "All free game steps = "
-	LabelRetriggers     = "Retriggers = "
-	LabelRetriggerSteps = "Retriggers steps count = "
-	LabelMaxWinCount    = "MaxWin reached count = "
-	LabelMaxTotalWin    = "Max total win = "
-	LabelStepsWithWins  = "Steps with wins = "
-	LabelHitRate        = "Hit rate = "
+	LabelByWins           = "By anywhere wins = "
+	LabelFreeTriggered    = "Free games triggered = "
+	LabelAllFreeSteps     = "All free game steps = "
+	LabelRespinsTriggered = "Respin games triggered = "
+	LabelAllRespinsSteps  = "All Respin game steps = "
+	LabelRetriggers       = "Retriggers = "
+	LabelRetriggerSteps   = "Retriggers steps count = "
+	LabelMaxWinCount      = "MaxWin reached count = "
+	LabelMaxTotalWin      = "Max total win = "
+	LabelStepsWithWins    = "Steps with wins = "
+	LabelHitRate          = "Hit rate = "
 
-	TitleBaseWinRanges = "Only Base Phase TotalWin ranges"
-	TitleFreeWinRanges = "Only Free Phase TotalWin ranges"
+	TitleBaseWinRanges           = "Only Base Phase StepWin ranges"
+	TitleFreeWinRanges           = "Only Free Phase StepWin ranges"
+	TitleRespinBaseWinRanges     = "Only Respin Phase From Base StepWin ranges"
+	TitleRespinFreeWinRanges     = "Only Respin Phase From Free StepWin ranges"
+	TitleRespinWithBaseWinRanges = "Respin With Base StepWin ranges"
+	TitleRespinWithFreeWinRanges = "Respin With Free StepWin ranges"
 )
 
 // Config carries all metadata required to generate a simulation summary report.
@@ -108,6 +115,30 @@ func (rb *Builder) addSection() {
 	rb.builder.WriteString(SectionSeparator)
 }
 
+func (rb *Builder) line(label, value string) {
+	rb.addLine(label + value)
+}
+
+func (rb *Builder) tab(label, value string) {
+	rb.addTabLine(label + value)
+}
+
+func (rb *Builder) tabFloat(label string, value float64) {
+	rb.tab(label, simtools.Float64ToString(value))
+}
+
+func (rb *Builder) tabInt(label string, value int) {
+	rb.tab(label, simtools.IntToString(value))
+}
+
+func (rb *Builder) tabUint64(label string, value uint64) {
+	rb.tab(label, simtools.Uint64ToString(value))
+}
+
+func (rb *Builder) tabUint32(label string, value uint32) {
+	rb.tab(label, simtools.Uint32ToString(value))
+}
+
 // GetFormattedReport returns the accumulated report text as a string.
 func (rb *Builder) GetFormattedReport() string {
 	return rb.builder.String()
@@ -123,7 +154,9 @@ func (rb *Builder) GetFormattedReport() string {
 func (rb *Builder) WriteReport(res *result.Result, config Config) {
 	rb.writeReportHeader(config)
 	rb.writeTotalRTPSection(config, res)
-	rb.writeBaseGameSection(config, res.Base())
+	rb.writeBaseGameSection(config, res)
+	rb.writeFreeGameSection(config, res)
+	rb.writeRespinGameSection(config, res)
 	rb.writeVolatilitySection(res, config)
 	rb.writeMaxWinSection(res, config.RoundCost)
 	rb.writeHitRateSection(res, config.Spins)
@@ -145,19 +178,74 @@ func (rb *Builder) writeReportHeader(config Config) {
 func (rb *Builder) writeTotalRTPSection(config Config, res *result.Result) {
 	rb.addSection()
 
-	totalWins := res.Base().GetWins()
-	totalRTP := simtools.CalculateRTP(config.TotalBet, totalWins)
+	totalWins := res.Base().GetWins() +
+		res.Free().GetWins() +
+		res.ReSpin().GetWinsFromBase() +
+		res.ReSpin().GetWinsFromFree()
+
+	totalRTP := safeRTP(config.TotalBet, totalWins)
 	rb.addLine(SectionTotalRTP + simtools.Float64ToString(totalRTP))
 }
 
 // writeBaseGameSection writes base game section
-func (rb *Builder) writeBaseGameSection(config Config, baseRes *result.BaseGame) {
+func (rb *Builder) writeBaseGameSection(config Config, res *result.Result) {
 	rb.addSection()
 
-	baseRTP := simtools.CalculateRTP(config.TotalBet, baseRes.GetWins())
+	base := res.Base()
 
-	rb.addLine(SectionBaseRTP + simtools.Float64ToString(baseRTP))
-	rb.addTabLine(LabelByWins + simtools.Float64ToString(baseRTP))
+	baseRTP := safeRTP(config.TotalBet, base.GetWins())
+
+	rb.line(SectionBaseRTP, simtools.Float64ToString(baseRTP))
+
+	rb.tabFloat(LabelByWins, baseRTP)
+	rb.tabUint64(LabelFreeTriggered, base.GetFreeGameTriggered())
+	rb.tabInt(LabelAllFreeSteps, base.GetAllFreeGameSteps())
+	rb.tabUint64(LabelRespinsTriggered, base.GetRespinGameTriggered())
+	rb.tabInt(LabelAllRespinsSteps, base.GetAllRespinGameSteps())
+}
+
+// writeFreeGameSection writes free spins section
+func (rb *Builder) writeFreeGameSection(config Config, res *result.Result) {
+	rb.addSection()
+
+	free := res.Free()
+
+	freeRTP := safeRTP(config.TotalBet, free.GetWins())
+
+	rb.line(SectionFreeRTP, simtools.Float64ToString(freeRTP))
+
+	rb.tabFloat(LabelByWins, freeRTP)
+	rb.tabUint64(LabelRespinsTriggered, free.GetRespinGameTriggered())
+	rb.tabInt(LabelAllRespinsSteps, free.GetAllRespinGameSteps())
+}
+
+// writeReSpinGameSection writes free spins section
+func (rb *Builder) writeRespinGameSection(
+	config Config,
+	res *result.Result,
+) {
+	rb.addSection()
+
+	rs := res.ReSpin()
+
+	fromBaseRTP := safeRTP(config.TotalBet, rs.GetWinsFromBase())
+	fromFreeRTP := safeRTP(config.TotalBet, rs.GetWinsFromFree())
+
+	rb.line(SectionRespinRTP, simtools.Float64ToString(fromBaseRTP+fromFreeRTP))
+
+	rb.tabFloat("Form Base RTP = ", fromBaseRTP)
+	rb.tabInt("Form Base Retriggers ", rs.GetReTriggersCountFromBase())
+	rb.tabUint32(
+		"Retriggers from Base steps count = ",
+		rs.GetReTriggerStepsCountFromBase(),
+	)
+
+	rb.tabFloat("Form Free RTP = ", fromFreeRTP)
+	rb.tabInt("Form Free Retriggers = ", rs.GetReTriggersCountFromFree())
+	rb.tabUint32(
+		"Retriggers from Free steps count = ",
+		rs.GetReTriggerStepsCountFromFree(),
+	)
 }
 
 // writeVolatilitySection writes volatility section
@@ -278,4 +366,12 @@ func (g *GeneralWriter) writeReport(report string) error {
 	}
 
 	return nil
+}
+
+func safeRTP(totalBet uint64, wins uint64) float64 {
+	if totalBet == 0 || wins == 0 {
+		return 0
+	}
+
+	return simtools.CalculateRTP(totalBet, wins)
 }
