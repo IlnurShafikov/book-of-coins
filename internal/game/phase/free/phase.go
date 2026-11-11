@@ -93,6 +93,7 @@ func (f *SpinPhase) Spin(
 	}
 
 	res.SetBeforeBoard(boardRes)
+	res.SetAfterBoard(boardRes.Copy())
 
 	stepWin, err := f.processWin(res, eventer, winLimiter)
 	if err != nil {
@@ -235,7 +236,7 @@ func (f *SpinPhase) checkExpandCoins(res *result.Free) bool {
 		return false
 	}
 
-	boardRes := res.BeforeBoard().Copy()
+	boardRes := res.AfterBoard()
 	rows := boardRes.Board.FirstReelSize()
 
 	for _, reel := range res.ExpandReels() {
@@ -260,7 +261,6 @@ func (f *SpinPhase) checkExpandCoins(res *result.Free) bool {
 	}
 
 	boardRes.Coins = newCoinRes
-	res.SetAfterBoard(boardRes)
 
 	return true
 }

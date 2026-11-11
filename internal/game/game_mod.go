@@ -8,6 +8,10 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/model"
 )
 
+// freeSpinsCapacityFactor pre-sizes the free spins slice to hold the initial
+// spins plus a typical number of retriggers.
+const freeSpinsCapacityFactor = 2
+
 // BasePhase defines the interface for base game phase operations
 type BasePhase interface {
 	Spin(rng model.RNG, winLimiter limiter.WinLimiter) (*result.Base, error)
@@ -128,10 +132,12 @@ func (g *Mod) startFreePhaseIfTriggered(
 		return nil // No free spins triggered
 	}
 
-	allRes := make([]*result.Free, 0, fsCount*2)
+	allRes := make([]*result.Free, 0, fsCount*freeSpinsCapacityFactor)
 
 	expandSymbolID := roundResult.BasePhase.ExpandSymbolID()
 
+	// fsCount grows on retriggers, so the bound must be re-evaluated on every iteration.
+	//nolint:intrange // range over int evaluates the bound only once
 	for fsIndex := 0; fsIndex < int(fsCount); fsIndex++ {
 		if winLimiter.MaxWinReached() {
 			break

@@ -10,13 +10,13 @@ import (
 )
 
 func ReadValueGetter(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
 	general *configs.GeneralConfig,
 ) (*getter.CoinValue, error) {
 	const fileName = "coin_values"
 
-	coinValues, err := ReadWeight(reader, phasePath.File(fileName))
+	coinValues, err := ReadWeight(csvReader, phasePath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read coin values: %w", err)
 	}

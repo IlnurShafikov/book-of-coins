@@ -29,7 +29,6 @@ func (c *CoinValue) GenerateValues(
 	rng model.RNG,
 	board model.Board,
 ) (coins.CoinResult, error) {
-
 	coinCount := board.CalculateSymbol(rules.CoinID)
 	if coinCount == 0 {
 		return nil, nil

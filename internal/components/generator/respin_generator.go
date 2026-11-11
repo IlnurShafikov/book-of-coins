@@ -10,8 +10,8 @@ import (
 )
 
 type ReSpinGenerator struct {
-	needPlaceCoin weight.Group
 	getterValues  *getter.CoinValue
+	needPlaceCoin weight.Group
 }
 
 func NewReSpinGenerator(

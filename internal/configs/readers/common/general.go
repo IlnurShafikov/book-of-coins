@@ -16,19 +16,19 @@ import (
 // The paytable defines symbol payouts and count ranges for winning combinations.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - pointer to PayTable containing symbol payouts and ranges
 //   - error if reading or parsing fails
 func ReadPaytable(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) (*paytable.PayTable, error) {
 	const fileName = "paytable"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read paytable: %w", err)
 	}
@@ -45,19 +45,19 @@ func ReadPaytable(
 // The paytable defines symbol payouts and count ranges for winning combinations.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - pointer to PayTable containing symbol payouts and ranges
 //   - error if reading or parsing fails
 func ReadScatterPaytable(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) (*paytable.PayTable, error) {
 	const fileName = "scatter_paytable"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read paytable: %w", err)
 	}
@@ -74,19 +74,19 @@ func ReadScatterPaytable(
 // This counter determines the number of free spins awarded at the start.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - FSInitCounter containing the initial free spins count distribution
 //   - error if reading or parsing fails
 func ReadFsInitCounter(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) (fscounter.FSInitCounter, error) {
 	const fileName = "fs_init_counter"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read data fs init counter: %w", err)
 	}
@@ -103,19 +103,19 @@ func ReadFsInitCounter(
 // This configuration defines the number of symbols present on each reel.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - slice of integers representing the number of symbols on each reel
 //   - error if reading or parsing fails
 func ReadSymbolsOnReel(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) ([]int, error) {
 	const fileName = "symbols_on_reel"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read data symbols on reel: %w", err)
 	}
@@ -132,16 +132,19 @@ func ReadSymbolsOnReel(
 // This configuration maps jackpot values to their corresponding jackpot type identifiers.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - map where keys are jackpot values (uint64) and values are jackpot type IDs (int)
 //   - error if reading or parsing fails
-func ReadJpTypes(reader *reader.Adapter, generalPath *tools.PathBuilder) (map[uint64]int, error) {
+func ReadJpTypes(
+	csvReader *reader.Adapter,
+	generalPath *tools.PathBuilder,
+) (map[uint64]int, error) {
 	const fileName = "jp_types"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read jp types data: %w", err)
 	}
@@ -154,10 +157,13 @@ func ReadJpTypes(reader *reader.Adapter, generalPath *tools.PathBuilder) (map[ui
 	return jpTypes, nil
 }
 
-func ReadExpandMinCount(reader *reader.Adapter, generalPath *tools.PathBuilder) (map[int]int, error) {
+func ReadExpandMinCount(
+	csvReader *reader.Adapter,
+	generalPath *tools.PathBuilder,
+) (map[int]int, error) {
 	const fileName = "expand_min_count"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read jp types data: %w", err)
 	}
@@ -174,19 +180,19 @@ func ReadExpandMinCount(reader *reader.Adapter, generalPath *tools.PathBuilder) 
 // This configuration defines ranges of coin counts mapped to interval IDs for respin logic.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - Intervals containing coin count ranges with their IDs
 //   - error if reading or parsing fails
 func ReadCoinIntervals(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) (intervals.Intervals, error) {
 	const fileName = "rs_coin_intervals"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read rs coin intervals: %w", err)
 	}
@@ -200,7 +206,7 @@ func ReadCoinIntervals(
 }
 
 func ReadGrandRules(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) (*configs.GrandRules, error) {
 	const (
@@ -209,17 +215,17 @@ func ReadGrandRules(
 		grandWinName         = "grand_win"
 	)
 
-	coinCountToGrand, err := reader.ReadInt(generalPath.File(coinCountToGrandName))
+	coinCountToGrand, err := csvReader.ReadInt(generalPath.File(coinCountToGrandName))
 	if err != nil {
 		return nil, fmt.Errorf("read coin count to grand: %w", err)
 	}
 
-	grandJpType, err := reader.ReadInt(generalPath.File(grandJpTypeName))
+	grandJpType, err := csvReader.ReadInt(generalPath.File(grandJpTypeName))
 	if err != nil {
 		return nil, fmt.Errorf("read grand jackpot type: %w", err)
 	}
 
-	grandWin, err := reader.ReadUint64(generalPath.File(grandWinName))
+	grandWin, err := csvReader.ReadUint64(generalPath.File(grandWinName))
 	if err != nil {
 		return nil, fmt.Errorf("read grand win: %w", err)
 	}

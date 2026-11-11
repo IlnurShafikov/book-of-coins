@@ -41,9 +41,11 @@ func NewFree(expandSymbolID int) *Free {
 		expandReels:    nil,
 		expandSymbolID: expandSymbolID,
 		events:         nil,
+		ReSpins:        nil,
 		fsTotalWin:     0,
 		stepWin:        0,
 		reTriggers:     0,
+		reSpinInitial:  0,
 		maxWinReached:  false,
 	}
 }

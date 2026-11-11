@@ -21,7 +21,7 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/weight"
 )
 
-// / SpinPhase represents the base game spin phase with all its components.
+// SpinPhase represents the base game spin phase with all its components.
 // It contains the game mechanics and configurations needed to execute a base spin.
 type SpinPhase struct {
 	// gen produces raw reel boards for a given group ID.
@@ -161,8 +161,8 @@ func (b *SpinPhase) processWin(
 // it checks respin trigger conditions by coin count.
 //
 // Parameters:
+//   - rng: random number generator used to pick the expand symbol
 //   - res: the base result to update with triggered features
-//   - eventer: event collector for recording trigger events
 //
 // Returns:
 //   - error if trigger check or configuration fails
@@ -172,20 +172,7 @@ func (b *SpinPhase) checkBonusTrigger(rng model.RNG, res *result.Base) error {
 	fsCount := b.fSInitCounter.GetFsInitCount(scatterCount)
 
 	if fsCount > 0 {
-		safeValue, err := cast.SafeCast[uint32](fsCount)
-		if err != nil {
-			return fmt.Errorf("safe cast: %w", err)
-		}
-
-		expandSymbol, err := b.expandSymbol.GetRandomValue(rng)
-		if err != nil {
-			return fmt.Errorf("get random value: %w", err)
-		}
-
-		res.SetExpandSymbolID(expandSymbol)
-		res.SetFreeSpinsInitialsCount(safeValue)
-
-		return nil
+		return b.setFreeSpins(rng, res, fsCount)
 	}
 
 	coinsCount := boardResult.Board.CalculateSymbol(rules.CoinID)
@@ -193,6 +180,32 @@ func (b *SpinPhase) checkBonusTrigger(rng model.RNG, res *result.Base) error {
 	if err := b.setReSpins(res, coinsCount); err != nil {
 		return fmt.Errorf("set re spin: %w", err)
 	}
+
+	return nil
+}
+
+// setFreeSpins configures free spins and picks the symbol that will expand during them.
+//
+// Parameters:
+//   - rng: random number generator used to pick the expand symbol
+//   - res: the base result to update with free spins configuration
+//   - fsCount: number of free spins to grant
+//
+// Returns:
+//   - error if the cast or the expand symbol selection fails
+func (b *SpinPhase) setFreeSpins(rng model.RNG, res *result.Base, fsCount int) error {
+	safeValue, err := cast.SafeCast[uint32](fsCount)
+	if err != nil {
+		return fmt.Errorf("safe cast: %w", err)
+	}
+
+	expandSymbol, err := b.expandSymbol.GetRandomValue(rng)
+	if err != nil {
+		return fmt.Errorf("get random value: %w", err)
+	}
+
+	res.SetExpandSymbolID(expandSymbol)
+	res.SetFreeSpinsInitialsCount(safeValue)
 
 	return nil
 }

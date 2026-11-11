@@ -10,12 +10,12 @@ import (
 )
 
 func ReadCoinChanceGroup(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
 ) (weight.Group, error) {
 	const fileName = "coin_chance_group"
 
-	resp, err := readWeightsGroup(reader, phasePath.File(fileName))
+	resp, err := readWeightsGroup(csvReader, phasePath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read final coin values: %w", err)
 	}
@@ -27,19 +27,19 @@ func ReadCoinChanceGroup(
 // This is a general-purpose function for reading weight group configurations.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - phasePath: path builder pointing to the phase configuration directory
 //
 // Returns:
 //   - weights.Group containing weight distributions by group ID
 //   - error if reading or parsing fails
 func ReadGroup(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
 ) (weight.Group, error) {
 	const fileName = "weights_group"
 
-	resp, err := readWeightsGroup(reader, phasePath.File(fileName))
+	resp, err := readWeightsGroup(csvReader, phasePath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read coin values: %w", err)
 	}
@@ -51,17 +51,17 @@ func ReadGroup(
 // This is a helper function used by other weight group readers.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - filePath: complete path to the CSV file
 //
 // Returns:
 //   - weights.Group containing parsed weight distributions
 //   - error if reading or parsing fails
 func readWeightsGroup(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	filePath string,
 ) (weight.Group, error) {
-	data, err := readWeightsData(reader, filePath)
+	data, err := readWeightsData(csvReader, filePath)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", filePath, err)
 	}
@@ -158,17 +158,17 @@ func parseWeightItems(values, weightsRow []string) ([]weight.Item, error) {
 // readWeightsData reads raw CSV data from a file.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - filePath: path to the CSV file
 //
 // Returns:
 //   - 2D slice of strings representing CSV data
 //   - error if reading fails
 func readWeightsData(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	filePath string,
 ) ([][]string, error) {
-	data, err := reader.ReadCSV(filePath)
+	data, err := csvReader.ReadCSV(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("read weights data: %w", err)
 	}

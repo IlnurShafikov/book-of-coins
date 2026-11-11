@@ -50,7 +50,7 @@ func (c *Coin) Collect(
 
 	stepWin, _ := winLimiter.Add(totalCoinSum)
 
-	collectEvent := events.NewCollectCoinEvent(res.Coins)
+	collectEvent := events.NewCollectCoinEvent(res.Coins.Copy())
 	eventer.Add(collectEvent)
 
 	return stepWin

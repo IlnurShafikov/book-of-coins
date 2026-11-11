@@ -14,7 +14,7 @@ import (
 // Currently returns a basic configuration; extend as needed for your game.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - modPath: path builder pointing to the game mode directory
 //   - general: general configuration shared across all phases
 //
@@ -22,7 +22,7 @@ import (
 //   - pointer to SpinPhase containing free spins configuration
 //   - error if reading or parsing fails
 func readFreePhase(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	modPath *tools.PathBuilder,
 	general *configs.GeneralConfig,
 ) (*free.SpinPhase, error) {
@@ -32,19 +32,19 @@ func readFreePhase(
 
 	phasePath := modPath.Phase(freePrefix)
 
-	dist, err := common.ReadDistributions(reader, phasePath)
+	dist, err := common.ReadDistributions(csvReader, phasePath)
 	if err != nil {
 		return nil, fmt.Errorf("read distributions: %w", err)
 	}
 
-	reelsGenerator, err := readReelsGenerator(reader, phasePath, general, dist.CopyValues())
+	reelsGenerator, err := readReelsGenerator(csvReader, phasePath, general, dist.CopyValues())
 	if err != nil {
 		return nil, fmt.Errorf("read reels generator: %w", err)
 	}
 
 	calc := readCalculators(general)
 
-	getterValue, err := common.ReadValueGetter(reader, phasePath, general)
+	getterValue, err := common.ReadValueGetter(csvReader, phasePath, general)
 	if err != nil {
 		return nil, fmt.Errorf("read value getter: %w", err)
 	}

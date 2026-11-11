@@ -18,7 +18,7 @@ import (
 // required for the respin phase.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - modPath: path builder pointing to the game mode directory
 //   - general: general configuration shared across all phases
 //
@@ -26,7 +26,7 @@ import (
 //   - pointer to SpinPhase containing respin phase configuration with all components
 //   - error if reading or parsing fails
 func readReSpinPhase(
-	reader *reader.Adapter, modPath *tools.PathBuilder, general *configs.GeneralConfig,
+	csvReader *reader.Adapter, modPath *tools.PathBuilder, general *configs.GeneralConfig,
 ) (*respin.SpinPhase, error) {
 	const (
 		respinPrefix = "respin"
@@ -34,12 +34,12 @@ func readReSpinPhase(
 
 	phasePath := modPath.Phase(respinPrefix)
 
-	gen, err := readRespinGenerator(reader, phasePath, general)
+	gen, err := readRespinGenerator(csvReader, phasePath, general)
 	if err != nil {
 		return nil, fmt.Errorf("read respin generator: %w", err)
 	}
 
-	coinInterval, err := readCoinIntervalsGroup(reader, phasePath)
+	coinInterval, err := readCoinIntervalsGroup(csvReader, phasePath)
 	if err != nil {
 		return nil, fmt.Errorf("read coin intervals group: %w", err)
 	}
@@ -56,16 +56,16 @@ func readReSpinPhase(
 }
 
 func readRespinGenerator(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
 	general *configs.GeneralConfig,
 ) (*generator.ReSpinGenerator, error) {
-	coinChance, err := common.ReadCoinChanceGroup(reader, phasePath)
+	coinChance, err := common.ReadCoinChanceGroup(csvReader, phasePath)
 	if err != nil {
 		return nil, fmt.Errorf("read coin chance group: %w", err)
 	}
 
-	getterValue, err := common.ReadValueGetter(reader, phasePath, general)
+	getterValue, err := common.ReadValueGetter(csvReader, phasePath, general)
 	if err != nil {
 		return nil, fmt.Errorf("read value getter: %w", err)
 	}
@@ -75,12 +75,12 @@ func readRespinGenerator(
 	return gen, nil
 }
 func readCoinIntervalsGroup(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
 ) (intervals.Intervals, error) {
 	const fileName = "coin_intervals_group"
 
-	data, err := reader.ReadCSV(phasePath.File(fileName))
+	data, err := csvReader.ReadCSV(phasePath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read rs coin intervals: %w", err)
 	}

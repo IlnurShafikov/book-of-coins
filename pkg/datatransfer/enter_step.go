@@ -4,6 +4,7 @@ package datatransfer
 import (
 	"fmt"
 
+	"github.com/IlnurShafikov/book-of-coins/internal/entities/result"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/rules"
 	"github.com/IlnurShafikov/book-of-coins/internal/game"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/base"
@@ -122,10 +123,12 @@ func initialPayload(clientSymbols []*common.Symbol) base.Payload {
 	}
 }
 
-func initBoard() model.Board {
-	return model.Board{
+func initBoard() *result.BoardResult {
+	board := model.Board{
 		{rules.Ace, rules.High1, rules.High2},
 		{rules.Jack, rules.King, rules.Med1},
 		{rules.Ace, rules.Queen, rules.Med2},
 	}
+
+	return result.NewBoardResult(board)
 }
