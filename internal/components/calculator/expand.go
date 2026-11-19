@@ -16,8 +16,10 @@ import (
 // An expanding symbol fills its entire reel; wins are awarded on every
 // configured line based on how many reels contain the symbol.
 type ExpandCalculator struct {
+	// payTable holds the line payouts of the symbols.
 	payTable *paytable.PayTable
-	lines    lines.Lines
+	// lines holds the payline definitions the expansion is paid on.
+	lines lines.Lines
 }
 
 // NewExpandCalculator creates an ExpandCalculator with the given paytable and line definitions.

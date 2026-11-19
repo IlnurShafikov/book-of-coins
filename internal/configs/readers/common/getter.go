@@ -9,6 +9,16 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/tools/reader"
 )
 
+// ReadValueGetter reads the coin values of a phase and builds the coin value getter.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - phasePath: path builder pointing to the phase directory
+//   - general: general configuration providing the jackpot types
+//
+// Returns:
+//   - pointer to CoinValue
+//   - error if the coin values cannot be read
 func ReadValueGetter(
 	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,

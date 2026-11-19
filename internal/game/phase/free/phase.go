@@ -31,10 +31,13 @@ type SpinPhase struct {
 	// calc performs line and scatter win calculations
 	calc calculator.Calculators
 
+	// getterValues draws the values of the coins that land on the board
 	getterValues *getter.CoinValue
 
+	// expandMinCount maps a special symbol ID to the minimum number of reels it must occupy
 	expandMinCount map[int]int
 
+	// fSInitCounter determines the number of free spins awarded for scatters.
 	fSInitCounter fscounter.FSInitCounter
 
 	// rsInitCounter determines initial re spins count
@@ -69,6 +72,18 @@ func NewSpinPhase(
 	}
 }
 
+// Spin plays a free spin: it generates the board for the session's special symbol, draws the
+// coin values, pays line, scatter and expansion wins, and checks the retrigger of free spins
+// and the respin trigger of the coin expansion.
+//
+// Parameters:
+//   - rng: random number generator
+//   - expandSymbolID: special symbol of the free spins session
+//   - winLimiter: limiter enforcing the max win cap
+//
+// Returns:
+//   - pointer to Free containing the spin result
+//   - error if the spin cannot be executed
 func (f *SpinPhase) Spin(
 	rng model.RNG,
 	expandSymbolID int,
@@ -113,6 +128,15 @@ func (f *SpinPhase) Spin(
 	return res, nil
 }
 
+// checkRetrigger stores in the spin result the additional free spins awarded by the
+// scatters on the board and the respins awarded when the expansion of the coin special
+// symbol leaves enough coins on the board.
+//
+// Parameters:
+//   - res: result of the current free spin
+//
+// Returns:
+//   - error if the free spins or respins count cannot be converted to uint32
 func (f *SpinPhase) checkRetrigger(res *result.Free) error {
 	scatterCount := res.BeforeBoard().Board.CalculateSymbol(rules.ScatterID)
 	fsCount := f.fSInitCounter.GetFsInitCount(scatterCount)
@@ -146,8 +170,8 @@ func (f *SpinPhase) checkRetrigger(res *result.Free) error {
 	return nil
 }
 
-// processWin calculates all win types for a single free spin and collects jackpot coins.
-// It evaluates line wins, scatter wins, expanded symbol wins, and coin jackpot results.
+// processWin calculates all win types for a single free spin.
+// It evaluates line wins, scatter wins and the wins of the expanded special symbol.
 //
 // Parameters:
 //   - res: free spin result containing the board and expansion state
@@ -156,7 +180,6 @@ func (f *SpinPhase) checkRetrigger(res *result.Free) error {
 //
 // Returns:
 //   - stepWin: total win amount for this spin step
-//   - hourglassCount: count of hourglass symbols found (0 if expansion occurred)
 //   - error if calculation fails
 func (f *SpinPhase) processWin(
 	res *result.Free,
@@ -199,6 +222,16 @@ func (f *SpinPhase) processWin(
 	return stepWin, nil
 }
 
+// checkExpandReels finds the reels the special symbol expands on. The symbol expands when
+// it lands on at least expandMinCount reels; the reels are stored in the result and an
+// expand event is added.
+//
+// Parameters:
+//   - res: result of the current free spin
+//   - eventer: event collector for the client events
+//
+// Returns:
+//   - ErrInvalidExpandSymbolID if the symbol has no minimum count configured
 func (f *SpinPhase) checkExpandReels(res *result.Free, eventer *collectors.EventsCollector) error {
 	board := res.BeforeBoard().Board
 
@@ -227,6 +260,14 @@ func (f *SpinPhase) checkExpandReels(res *result.Free, eventer *collectors.Event
 	return nil
 }
 
+// checkExpandCoins expands the coin special symbol: every expanded reel is filled with
+// coins that copy the value of the coin that landed on the reel.
+//
+// Parameters:
+//   - res: result of the current free spin (its after board is modified)
+//
+// Returns:
+//   - true if the coins were expanded and the respins may start
 func (f *SpinPhase) checkExpandCoins(res *result.Free) bool {
 	if res.ExpandSymbolID() != rules.CoinID {
 		return false

@@ -6,4 +6,5 @@ import (
 	"errors"
 )
 
+// ErrInvalidExpandSymbolID is returned when the special symbol has no minimum expand count.
 var ErrInvalidExpandSymbolID = errors.New("invalid expand symbol id")

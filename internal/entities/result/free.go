@@ -5,8 +5,10 @@ import "github.com/IlnurShafikov/book-of-coins/internal/entities/result/events"
 // Free represents the result of a single free spin.
 // It contains all information about the free spin outcome, including events, wins, and retriggers.
 type Free struct {
+	// beforeBoard is the board as it landed
 	beforeBoard *BoardResult
-	afterBoard  *BoardResult
+	// afterBoard is the board after the coin expansion
+	afterBoard *BoardResult
 	// events accumulates all events that occurred during this free spin.
 	events []events.Event
 	// ReSpins contains results of respins triggered during this free spin
@@ -98,6 +100,10 @@ func (f *Free) ExpandReels() []int {
 	return f.expandReels
 }
 
+// SetExpandReels stores the reels where the special symbol expands.
+//
+// Parameters:
+//   - expandReels: 0-based indices of the expanded reels
 func (f *Free) SetExpandReels(expandReels []int) {
 	f.expandReels = expandReels
 }

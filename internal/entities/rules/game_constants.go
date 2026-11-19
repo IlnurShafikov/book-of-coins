@@ -3,50 +3,57 @@
 package rules
 
 // Symbol ID constants define unique identifiers for each symbol in the game.
-// TODO: implement symbols ids according to your game design
+// The IDs match the reel strips, the paytable and the special symbol weights.
 const (
-	// VoidSymbol represents an empty or null symbol position
+	// VoidSymbol represents an empty position; it is used for the empty cells of the
+	// respin phase and never appears on the reel strips
 	VoidSymbol = 0
 
-	// High1 represents the first high-paying symbol
+	// High1 is the most valuable regular symbol
 	High1 = 1
 
-	// High2 represents the second high-paying symbol
+	// High2 is the second high-pay symbol
 	High2 = 2
 
-	// Med1 represents the first medium-paying symbol
-	Med1 = 3
+	// High3 is the third high-pay symbol
+	High3 = 3
 
-	// Med2 represents the second medium-paying symbol
-	Med2 = 4
+	// High4 is the fourth high-pay symbol
+	High4 = 4
 
-	// Ace represents the Ace card symbol (low-paying)
-	Ace = 5
+	// Low1 is the first low-pay symbol
+	Low1 = 5
 
-	// King represents the King card symbol (low-paying)
-	King = 6
+	// Low2 is the second low-pay symbol
+	Low2 = 6
 
-	// Queen represents the Queen card symbol (low-paying)
-	Queen = 7
+	// Low3 is the third low-pay symbol
+	Low3 = 7
 
-	// Jack represents the Jack card symbol (low-paying)
-	Jack = 8
+	// Low4 is the fourth low-pay symbol
+	Low4 = 8
 
-	// Ten represents the Jack card symbol (low-paying)
-	Ten = 9
+	// Low5 is the least valuable symbol
+	Low5 = 9
 
-	// ScatterID represents the scatter symbol that triggers bonus features
+	// ScatterID is the Wild/Scatter symbol: one symbol that substitutes for the regular
+	// symbols on the lines and triggers the free spins when it lands anywhere on the board
 	ScatterID = 10
 
-	// CoinID represents the regular coin symbol
+	// CoinID is the coin symbol that carries a cash or jackpot value and triggers the respins
 	CoinID = 11
 )
 
 // Game mechanics constants
 const (
-	// InitRespinsCount defines the initial number of respins when the respin feature is triggered
-	InitRespinsCount    = 4
+	// InitRespinsCount is the number of respins at the start of the respin phase and the
+	// value the counter is restored to every time a new coin lands
+	InitRespinsCount = 4
+
+	// Step_TYPE_BASE_SPIN is the type of a base spin step.
 	Step_TYPE_BASE_SPIN = 1
+	// Step_TYPE_FREE_SPIN is the type of a free spin step.
 	Step_TYPE_FREE_SPIN = 2
-	Step_TYPE_RE_SPIN   = 3
+	// Step_TYPE_RE_SPIN is the type of a respin step.
+	Step_TYPE_RE_SPIN = 3
 )

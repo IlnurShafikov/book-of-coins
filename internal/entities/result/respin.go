@@ -14,6 +14,7 @@ type ReSpin struct {
 	// stepWin is the win amount for this specific respin
 	stepWin uint64
 
+	// totalWin is the cumulative win of the round up to and including this respin
 	totalWin uint64
 
 	// reTriggers is the number of additional respins triggered by this respin
@@ -93,7 +94,6 @@ func (r *ReSpin) SetMaxWinReached(reached bool) {
 func (r *ReSpin) BoardResult() *BoardResult {
 	return r.boardResult
 }
-
 
 // Events returns all events that occurred during this respin.
 //

@@ -7,14 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/IlnurShafikov/book-of-coins/internal/configs"
 	"github.com/IlnurShafikov/slot-engine/pkg/lines"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // Rules represents the complete game rules sent to the client.
 // It includes all information needed for the client to understand the game mechanics and payouts.
-// TODO: implement the required fields for your specific game
 type Rules struct {
 	// Volatility describes the game's volatility level (risk/variance)
 	Volatility *Volatility `json:"volatility"`
@@ -25,9 +25,11 @@ type Rules struct {
 	// ScatterPayTable contains payouts for scatter (pay anywhere) symbols
 	ScatterPayTable *PayTable `json:"scatterPaytable"`
 
-	Lines lines.Lines `json:"lines"`
-
+	// JpTypes maps each jackpot type ID to its prize value
 	JpTypes JpTypes `json:"jpTypes"`
+
+	// Lines contains the paylines: the row of every reel for each line
+	Lines lines.Lines `json:"lines"`
 
 	// MaxMultiplier is the maximum win multiplier relative to bet
 	MaxMultiplier uint64 `json:"maxMultiplier"`

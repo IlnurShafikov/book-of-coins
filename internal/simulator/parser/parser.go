@@ -4,12 +4,12 @@ package parser
 
 import (
 	resp "github.com/IlnurShafikov/book-of-coins/internal/entities/result"
-	"github.com/IlnurShafikov/book-of-coins/internal/entities/result/events"
 	"github.com/IlnurShafikov/book-of-coins/internal/simulator/result"
 )
 
 // RoundParser processes round results and accumulates simulation statistics
 type RoundParser struct {
+	// res accumulates the statistics of all processed rounds.
 	res *result.Result
 }
 
@@ -77,6 +77,7 @@ func (rp *RoundParser) parseBasePhase(
 	return baseTotalWin, totalRespinWin
 }
 
+// parseRespinPhaseFromFree processes the respins triggered by a free spin.
 func (rp *RoundParser) parseRespinPhaseFromFree(respinSteps []*resp.ReSpin) uint64 {
 	return rp.parseRespinPhase(
 		respinSteps,
@@ -84,6 +85,7 @@ func (rp *RoundParser) parseRespinPhaseFromFree(respinSteps []*resp.ReSpin) uint
 	)
 }
 
+// parseFreePhase processes all free spin results
 func (rp *RoundParser) parseFreePhase(
 	freeSteps []*resp.Free,
 ) (totalFreeWin, respinTotalWin uint64) {
@@ -107,6 +109,7 @@ func (rp *RoundParser) parseFreePhase(
 	return totalFreeWin, respinTotalWin
 }
 
+// processSingleFreeStep processes a single free spin step
 func (rp *RoundParser) processSingleFreeStep(
 	freeResult *resp.Free,
 ) (stepWin, respinTotalWin uint64) {
@@ -126,6 +129,7 @@ func (rp *RoundParser) processSingleFreeStep(
 	return stepWin, respinTotalWin
 }
 
+// parseRespinPhaseFromBase processes the respins triggered by the base spin.
 func (rp *RoundParser) parseRespinPhaseFromBase(respinSteps []*resp.ReSpin) uint64 {
 	return rp.parseRespinPhase(
 		respinSteps,
@@ -133,6 +137,14 @@ func (rp *RoundParser) parseRespinPhaseFromBase(respinSteps []*resp.ReSpin) uint
 	)
 }
 
+// parseRespinPhase sums the wins of the respins using the given step processor.
+//
+// Parameters:
+//   - respinSteps: respins to process
+//   - processStep: collects the statistics of one respin and returns its win
+//
+// Returns:
+//   - total win of all respins
 func (rp *RoundParser) parseRespinPhase(
 	respinSteps []*resp.ReSpin,
 	processStep func(*resp.ReSpin) uint64,
@@ -147,6 +159,8 @@ func (rp *RoundParser) parseRespinPhase(
 	return totalRespinWin
 }
 
+// processSingleRespinStepFromBase collects the statistics of a base game respin
+// and returns its win.
 func (rp *RoundParser) processSingleRespinStepFromBase(respinResult *resp.ReSpin) uint64 {
 	stepWin := respinResult.StepWin()
 
@@ -160,6 +174,8 @@ func (rp *RoundParser) processSingleRespinStepFromBase(respinResult *resp.ReSpin
 	return stepWin
 }
 
+// processSingleRespinStepFromFree collects the statistics of a free game respin
+// and returns its win.
 func (rp *RoundParser) processSingleRespinStepFromFree(respinResult *resp.ReSpin) uint64 {
 	stepWin := respinResult.StepWin()
 
@@ -185,21 +201,4 @@ func (rp *RoundParser) updateRoundStatistics(totalWin uint64) {
 // GetResult returns the accumulated simulation results
 func (rp *RoundParser) GetResult() *result.Result {
 	return rp.res
-}
-
-func parseScatterWin(baseEvents []events.Event) uint64 {
-	if len(baseEvents) == 0 {
-		return 0
-	}
-
-	for _, event := range baseEvents {
-		winEvent, ok := event.(*events.WinsEvent)
-		if !ok || len(winEvent.AnyWhereWins) == 0 {
-			continue
-		}
-
-		return winEvent.AnyWhereWins[0].Payout
-	}
-
-	return 0
 }

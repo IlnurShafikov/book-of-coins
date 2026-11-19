@@ -157,6 +157,15 @@ func ReadJpTypes(
 	return jpTypes, nil
 }
 
+// ReadExpandMinCount reads the minimum number of reels the special symbol must occupy to expand.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - generalPath: path builder pointing to the general configuration directory
+//
+// Returns:
+//   - map from the symbol ID to the minimum number of reels
+//   - error if reading or parsing fails
 func ReadExpandMinCount(
 	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
@@ -165,12 +174,12 @@ func ReadExpandMinCount(
 
 	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
-		return nil, fmt.Errorf("read jp types data: %w", err)
+		return nil, fmt.Errorf("read expand min count: %w", err)
 	}
 
 	expandMinCount, err := parseExpandMinCount(data)
 	if err != nil {
-		return nil, fmt.Errorf("parse jp types: %w", err)
+		return nil, fmt.Errorf("parse expand min count: %w", err)
 	}
 
 	return expandMinCount, nil
@@ -205,6 +214,16 @@ func ReadCoinIntervals(
 	return resp, nil
 }
 
+// ReadGrandRules reads the grand jackpot configuration: the coin count that pays it,
+// its jackpot type and its prize.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - generalPath: path builder pointing to the general configuration directory
+//
+// Returns:
+//   - pointer to GrandRules
+//   - error if any of the files cannot be read
 func ReadGrandRules(
 	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
@@ -272,6 +291,14 @@ func parseJpTypes(data [][]string) (map[uint64]int, error) {
 	return jpTypes, nil
 }
 
+// parseExpandMinCount parses the expand minimum count CSV rows [symbolID, minCount] into a map.
+//
+// Parameters:
+//   - data: 2D array of strings where each row contains [symbolID, minCount]
+//
+// Returns:
+//   - map from the symbol ID to the minimum number of reels
+//   - error if a row is malformed or a value is not a number
 func parseExpandMinCount(data [][]string) (map[int]int, error) {
 	const dataLen = 2
 

@@ -55,6 +55,16 @@ func readReSpinPhase(
 	return spinPhase, nil
 }
 
+// readRespinGenerator builds the respin generator from the coin chance groups and the coin values.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - phasePath: path builder pointing to the respin phase directory
+//   - general: general configuration providing the jackpot types
+//
+// Returns:
+//   - pointer to ReSpinGenerator
+//   - error if any file cannot be read
 func readRespinGenerator(
 	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
@@ -74,6 +84,17 @@ func readRespinGenerator(
 
 	return gen, nil
 }
+
+// readCoinIntervalsGroup reads the intervals that map the number of coins on the board
+// to a coin chance group.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - phasePath: path builder pointing to the respin phase directory
+//
+// Returns:
+//   - intervals of coin counts with their coin chance group IDs
+//   - error if reading or parsing fails
 func readCoinIntervalsGroup(
 	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,

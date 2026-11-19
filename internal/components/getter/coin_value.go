@@ -1,3 +1,4 @@
+// Package getter draws the values of the coins that land on the board.
 package getter
 
 import (
@@ -10,11 +11,22 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/weight"
 )
 
+// CoinValue draws the values of coins and attaches the jackpot type to jackpot values.
 type CoinValue struct {
+	// coinValues holds the weights of the coin values of the phase.
 	coinValues *weight.Weights
-	jpTypes    map[uint64]int
+	// jpTypes maps a jackpot coin value to its jackpot type ID.
+	jpTypes map[uint64]int
 }
 
+// NewCoinValue creates a coin value getter.
+//
+// Parameters:
+//   - coinValues: weights of the coin values of the phase
+//   - jpTypes: map from a jackpot value to its jackpot type ID
+//
+// Returns:
+//   - pointer to a new CoinValue
 func NewCoinValue(
 	coinValues *weight.Weights,
 	jpTypes map[uint64]int,
@@ -25,6 +37,15 @@ func NewCoinValue(
 	}
 }
 
+// GenerateValues draws a value for every coin symbol that lies on the board.
+//
+// Parameters:
+//   - rng: random number generator
+//   - board: board with the landed coins
+//
+// Returns:
+//   - coins with their positions and values (nil if there are no coins)
+//   - error if a value cannot be generated
 func (c *CoinValue) GenerateValues(
 	rng model.RNG,
 	board model.Board,
@@ -44,6 +65,16 @@ func (c *CoinValue) GenerateValues(
 	return resp, nil
 }
 
+// GenerateValuesInPositions draws an independent value for a coin at each position.
+// A value that equals a jackpot value also gets the jackpot type.
+//
+// Parameters:
+//   - rng: random number generator
+//   - positions: positions of the coins
+//
+// Returns:
+//   - coins with their positions and values (nil if there are no positions)
+//   - error if a value cannot be generated or converted to uint64
 func (c *CoinValue) GenerateValuesInPositions(
 	rng model.RNG,
 	positions model.Positions,

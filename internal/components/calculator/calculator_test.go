@@ -4,13 +4,14 @@ import (
 	"math"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/IlnurShafikov/book-of-coins/internal/components/calculator"
 	"github.com/IlnurShafikov/slot-engine/pkg/calculators"
 	"github.com/IlnurShafikov/slot-engine/pkg/lines"
 	"github.com/IlnurShafikov/slot-engine/pkg/model"
 	"github.com/IlnurShafikov/slot-engine/pkg/paytable"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const (

@@ -76,6 +76,7 @@ type Config struct {
 // GeneralWriter wraps an io.Writer and provides helper methods
 // for writing formatted simulation output.
 type GeneralWriter struct {
+	// writer is the destination of the report text.
 	writer io.Writer
 }
 
@@ -90,6 +91,7 @@ func NewGeneralWriter(writer io.Writer) *GeneralWriter {
 // Builder accumulates formatted simulation report text using a strings.Builder.
 // Call WriteReport to populate it, then GetFormattedReport to retrieve the result.
 type Builder struct {
+	// builder accumulates the report text.
 	builder strings.Builder
 }
 
@@ -115,26 +117,32 @@ func (rb *Builder) addSection() {
 	rb.builder.WriteString(SectionSeparator)
 }
 
+// line adds a line made of the label and the value.
 func (rb *Builder) line(label, value string) {
 	rb.addLine(label + value)
 }
 
+// tab adds a tab-indented line made of the label and the value.
 func (rb *Builder) tab(label, value string) {
 	rb.addTabLine(label + value)
 }
 
+// tabFloat adds a tab-indented line with a float64 value.
 func (rb *Builder) tabFloat(label string, value float64) {
 	rb.tab(label, simtools.Float64ToString(value))
 }
 
+// tabInt adds a tab-indented line with an int value.
 func (rb *Builder) tabInt(label string, value int) {
 	rb.tab(label, simtools.IntToString(value))
 }
 
+// tabUint64 adds a tab-indented line with a uint64 value.
 func (rb *Builder) tabUint64(label string, value uint64) {
 	rb.tab(label, simtools.Uint64ToString(value))
 }
 
+// tabUint32 adds a tab-indented line with a uint32 value.
 func (rb *Builder) tabUint32(label string, value uint32) {
 	rb.tab(label, simtools.Uint32ToString(value))
 }
@@ -291,6 +299,13 @@ func (rb *Builder) writeWinRangesSection(res *result.Result, repCfg Config) {
 	rb.addSection()
 }
 
+// writeWinRangeDetails writes a table of win ranges with count, frequency and RTP.
+//
+// Parameters:
+//   - title: table title
+//   - winRanges: win buckets to print
+//   - stepsCount: number of phases the frequency is calculated against
+//   - totalBet: total bet used for the RTP share of every bucket
 func (rb *Builder) writeWinRangeDetails(
 	title string, winRanges *result.WinRanges, stepsCount int, totalBet uint64,
 ) {
@@ -368,6 +383,8 @@ func (g *GeneralWriter) writeReport(report string) error {
 	return nil
 }
 
+// safeRTP returns the RTP of the wins against the total bet,
+// or 0 when either of them is zero.
 func safeRTP(totalBet uint64, wins uint64) float64 {
 	if totalBet == 0 || wins == 0 {
 		return 0

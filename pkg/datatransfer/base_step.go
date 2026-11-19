@@ -3,14 +3,15 @@ package datatransfer
 import (
 	"fmt"
 
+	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/result"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/result/events"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/rules"
 	baseDto "github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/base"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/common"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/step"
-	"github.com/google/uuid"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // TransformBaseStep transforms a base game result into a client-facing step.
