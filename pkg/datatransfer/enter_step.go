@@ -1,8 +1,9 @@
-//nolint:all // it's ok for enter step
 package datatransfer
 
 import (
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/result"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/rules"
@@ -11,7 +12,6 @@ import (
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/common"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/step"
 	"github.com/IlnurShafikov/slot-engine/pkg/model"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // GetEnterResult creates the initial game load result sent to the client.
@@ -123,11 +123,12 @@ func initialPayload(clientSymbols []*common.Symbol) base.Payload {
 	}
 }
 
+// initBoard returns the fixed board shown to the player before the first spin.
 func initBoard() *result.BoardResult {
 	board := model.Board{
-		{rules.Ace, rules.High1, rules.High2},
-		{rules.Jack, rules.King, rules.Med1},
-		{rules.Ace, rules.Queen, rules.Med2},
+		{rules.Low1, rules.High1, rules.High2},
+		{rules.Low4, rules.Low2, rules.High3},
+		{rules.Low1, rules.Low3, rules.High4},
 	}
 
 	return result.NewBoardResult(board)

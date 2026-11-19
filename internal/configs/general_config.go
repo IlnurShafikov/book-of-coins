@@ -11,13 +11,19 @@ import (
 // It includes payout tables and various multipliers used throughout the game.
 type GeneralConfig struct {
 	// PayTable contains symbol payouts and payout ranges for the game
-	PayTable        *paytable.PayTable
+	PayTable *paytable.PayTable
+	// ScatterPayTable contains the pay-anywhere payouts of the scatter symbol
 	ScatterPayTable *paytable.PayTable
-	GrandRules      *GrandRules
-	JpTypes         map[uint64]int
-	ExpandMinCount  map[int]int
-	FsInitCounter   fscounter.FSInitCounter
-	RsInitCounter   intervals.Intervals
+	// GrandRules describes the grand jackpot that is paid for a full board of coins
+	GrandRules *GrandRules
+	// JpTypes maps each jackpot value to its corresponding jackpot type identifier.
+	JpTypes map[uint64]int
+	// ExpandMinCount maps a special symbol ID to the minimum number of reels it must occupy
+	ExpandMinCount map[int]int
+	// FsInitCounter maps the number of scatter symbols to the number of free spins awarded.
+	FsInitCounter fscounter.FSInitCounter
+	// RsInitCounter maps the number of coins on the board to the number of respins
+	RsInitCounter intervals.Intervals
 
 	// Multipliers contains various multiplier configurations (cost, max win, etc.)
 	Multipliers *MultipliersConfigs
@@ -32,10 +38,14 @@ type GeneralConfig struct {
 	WinLines lines.Lines
 }
 
+// GrandRules describes the grand jackpot of the respin phase.
 type GrandRules struct {
+	// CoinCountToGrand is the number of coins on a full board that pays the grand jackpot
 	CoinCountToGrand int
-	GrandJpType      int
-	GrandWin         uint64
+	// GrandJpType is the jackpot type ID of the grand jackpot
+	GrandJpType int
+	// GrandWin is the grand jackpot prize in units of the cost multiplier
+	GrandWin uint64
 }
 
 // MultipliersConfigs contains all multiplier-related configuration values.

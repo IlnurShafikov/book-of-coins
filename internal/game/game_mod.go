@@ -14,11 +14,13 @@ const freeSpinsCapacityFactor = 2
 
 // BasePhase defines the interface for base game phase operations
 type BasePhase interface {
+	// Spin plays a base spin under the shared win limiter.
 	Spin(rng model.RNG, winLimiter limiter.WinLimiter) (*result.Base, error)
 }
 
 // FreePhase defines the interface for free spins phase operations
 type FreePhase interface {
+	// Spin plays a free spin of the session with the given special symbol.
 	Spin(
 		rng model.RNG,
 		expandSymbolID int,
@@ -26,7 +28,9 @@ type FreePhase interface {
 	) (*result.Free, error)
 }
 
+// ReSpinPhase defines the interface for respin phase operations
 type ReSpinPhase interface {
+	// Spins plays the whole respin session started from the given board.
 	Spins(
 		rng model.RNG,
 		rsCount int,
@@ -124,6 +128,7 @@ func (g *Mod) startBasePhase(
 	return nil
 }
 
+// startFreePhaseIfTriggered checks for free spin triggers and executes the free spin phase
 func (g *Mod) startFreePhaseIfTriggered(
 	rng model.RNG, roundResult *result.Round, winLimiter limiter.WinLimiter,
 ) error {

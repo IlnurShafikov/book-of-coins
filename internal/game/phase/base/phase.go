@@ -27,6 +27,7 @@ type SpinPhase struct {
 	// gen produces raw reel boards for a given group ID.
 	gen *generator.Generator
 
+	// getterValues draws the values of the coins that land on the board
 	getterValues *getter.CoinValue
 
 	// dist define the weighted symbol distributions for reels
@@ -45,6 +46,19 @@ type SpinPhase struct {
 	rsInitCounter intervals.Intervals
 }
 
+// NewSpinPhase creates a new base game spin phase with the specified components.
+//
+// Parameters:
+//   - dist: weights used to pick the reel group of the spin
+//   - gen: board generator built from the reel strips
+//   - getterValues: draws the values of the coins that land on the board
+//   - calc: line, scatter and expand wins calculator
+//   - expandSymbol: weighted pool of the special symbols of a free spin session
+//   - fsInitCounter: number of free spins awarded for the scatter count
+//   - rsInitCounter: number of respins awarded for the coin count
+//
+// Returns:
+//   - pointer to a new SpinPhase instance
 func NewSpinPhase(
 	dist *weight.Weights,
 	gen *generator.Generator,
@@ -236,6 +250,15 @@ func (b *SpinPhase) setReSpins(
 	return nil
 }
 
+// generateCoinValue draws the values of the coins that landed on the board.
+//
+// Parameters:
+//   - rng: random number generator
+//   - board: board of the spin
+//
+// Returns:
+//   - coins with their positions and values (nil if there are no coins)
+//   - error if a value cannot be generated
 func (b *SpinPhase) generateCoinValue(
 	rng model.RNG,
 	board model.Board,

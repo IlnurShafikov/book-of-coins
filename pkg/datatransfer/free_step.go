@@ -3,14 +3,15 @@ package datatransfer
 import (
 	"fmt"
 
+	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/result"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/result/events"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/rules"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/common"
 	freeDto "github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/free"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/step"
-	"github.com/google/uuid"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // TransformFreeStep transforms all free spins from a round into client-facing steps.

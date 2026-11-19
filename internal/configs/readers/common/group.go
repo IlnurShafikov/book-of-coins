@@ -9,6 +9,16 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/weight"
 )
 
+// ReadCoinChanceGroup reads the respin coin chance groups: for every group the weights of
+// an empty cell staying empty or becoming a coin.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - phasePath: path builder pointing to the phase directory
+//
+// Returns:
+//   - weight.Group with the weights by group ID
+//   - error if reading or parsing fails
 func ReadCoinChanceGroup(
 	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,

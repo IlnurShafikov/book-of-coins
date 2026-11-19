@@ -1,3 +1,5 @@
+// Package generator contains the generator that drops new coins into the empty cells
+// of the board during respins.
 package generator
 
 import (
@@ -9,11 +11,23 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/weight"
 )
 
+// ReSpinGenerator drops new coins into the empty cells of the board during respins.
 type ReSpinGenerator struct {
-	getterValues  *getter.CoinValue
+	// getterValues draws the values of the new coins.
+	getterValues *getter.CoinValue
+	// needPlaceCoin holds, for every coin chance group, the weights of an empty cell staying
+	// empty or becoming a coin.
 	needPlaceCoin weight.Group
 }
 
+// NewReSpinGenerator creates a respin generator.
+//
+// Parameters:
+//   - needPlaceCoin: weights of an empty cell staying empty or becoming a coin per group
+//   - getterValues: draws the values of the new coins
+//
+// Returns:
+//   - pointer to a new ReSpinGenerator
 func NewReSpinGenerator(
 	needPlaceCoin weight.Group,
 	getterValues *getter.CoinValue,
@@ -24,6 +38,17 @@ func NewReSpinGenerator(
 	}
 }
 
+// Generate decides which empty cells of the board get a coin, places the coins and draws
+// their values. The new coins are appended to boardResult.Coins.
+//
+// Parameters:
+//   - rng: random number generator
+//   - groupID: coin chance group chosen by the number of coins on the board
+//   - boardResult: board of the respin phase (modified)
+//
+// Returns:
+//   - number of coins added in this respin
+//   - error if a coin cannot be placed or its value cannot be generated
 func (r *ReSpinGenerator) Generate(
 	rng model.RNG,
 	groupID int,
@@ -48,6 +73,17 @@ func (r *ReSpinGenerator) Generate(
 	return len(newCoins), nil
 }
 
+// placeCoinToBoard walks over the empty cells and independently turns each of them into
+// a coin with the weight of the given group. All cells of one respin use the same group.
+//
+// Parameters:
+//   - rng: random number generator
+//   - groupID: coin chance group
+//   - boardResult: board of the respin phase (modified: coins are set on the board)
+//
+// Returns:
+//   - positions of the placed coins (nil if the board has no empty cells)
+//   - error if the random value cannot be drawn
 func (r *ReSpinGenerator) placeCoinToBoard(
 	rng model.RNG,
 	groupID int,

@@ -1,3 +1,5 @@
+// Package manager contains the component that collects the coins of a board and pays the
+// coin win and the grand jackpot.
 package manager
 
 import (
@@ -8,12 +10,26 @@ import (
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/rules"
 )
 
+// Coin collects the coins of a board and pays the accumulated win, including the grand
+// jackpot for a full board.
 type Coin struct {
-	grandWin         uint64
-	grandJpType      int
+	// grandWin is the grand jackpot prize added to the coin sum.
+	grandWin uint64
+	// grandJpType is the jackpot type ID sent with the grand win event.
+	grandJpType int
+	// coinCountToGrand is the number of coins on the board that awards the grand jackpot.
 	coinCountToGrand int
 }
 
+// NewCoin creates a coin win manager.
+//
+// Parameters:
+//   - grandWin: grand jackpot prize
+//   - grandJpType: jackpot type ID of the grand jackpot
+//   - coinCountToGrand: number of coins on the board that awards the grand jackpot
+//
+// Returns:
+//   - pointer to a new Coin
 func NewCoin(
 	grandWin uint64,
 	grandJpType int,
@@ -26,6 +42,17 @@ func NewCoin(
 	}
 }
 
+// Collect sums the values of all coins of the board, adds the grand jackpot when the board
+// holds coinCountToGrand coins, passes the sum through the win limiter and records the
+// collect (and grand win) events.
+//
+// Parameters:
+//   - res: board result with the coins to collect
+//   - eventer: event collector for the client events
+//   - winLimiter: limiter enforcing the max win cap
+//
+// Returns:
+//   - win paid for the coins after the cap (0 if there are no coins)
 func (c *Coin) Collect(
 	res *result.BoardResult,
 	eventer *collectors.EventsCollector,

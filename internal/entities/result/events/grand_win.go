@@ -1,5 +1,6 @@
 package events
 
+// GrandWinEvent is sent when the grand jackpot is paid for a full board of coins.
 type GrandWinEvent struct {
 	// Type is the event type identifier
 	Type Type `json:"type"`
@@ -11,6 +12,14 @@ type GrandWinEvent struct {
 	JpType int `json:"jpType"`
 }
 
+// NewGrandWinEvent creates a grand win event.
+//
+// Parameters:
+//   - value: grand jackpot prize
+//   - jpType: jackpot type ID of the grand jackpot
+//
+// Returns:
+//   - pointer to a new GrandWinEvent
 func NewGrandWinEvent(value uint64, jpType int) *GrandWinEvent {
 	return &GrandWinEvent{
 		Type:   GrandWinType,

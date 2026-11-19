@@ -6,4 +6,5 @@ import (
 	"errors"
 )
 
+// ErrInvalidIntervalCoinCount is returned when the number of coins matches no coin chance group.
 var ErrInvalidIntervalCoinCount = errors.New("invalid interval of coin count")

@@ -4,6 +4,7 @@ import "github.com/IlnurShafikov/book-of-coins/internal/entities/result/events"
 
 // stepEventProvider is implemented by any game step that exposes its events.
 type stepEventProvider interface {
+	// Events returns the events of the step.
 	Events() []events.Event
 }
 
@@ -68,6 +69,14 @@ func transformWinEvent(curEvent events.Event, betValue uint64) error {
 	return nil
 }
 
+// transfomCollectCoinEvent scales the values of the collected coins by the bet.
+//
+// Parameters:
+//   - curEvent: the event to transform (must be *events.CollectCoinEvent)
+//   - betValue: the player's bet value
+//
+// Returns:
+//   - error if the event has a wrong type
 func transfomCollectCoinEvent(curEvent events.Event, betValue uint64) error {
 	collectCoinEvent, ok := curEvent.(*events.CollectCoinEvent)
 	if !ok {
@@ -81,6 +90,14 @@ func transfomCollectCoinEvent(curEvent events.Event, betValue uint64) error {
 	return nil
 }
 
+// transfomGrandWinEvent scales the grand win value by the bet.
+//
+// Parameters:
+//   - curEvent: the event to transform (must be *events.GrandWinEvent)
+//   - betValue: the player's bet value
+//
+// Returns:
+//   - error if the event has a wrong type
 func transfomGrandWinEvent(curEvent events.Event, betValue uint64) error {
 	grandWinEvent, ok := curEvent.(*events.GrandWinEvent)
 	if !ok {

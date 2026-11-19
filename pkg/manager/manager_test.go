@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/result"
 	"github.com/IlnurShafikov/book-of-coins/internal/entities/rules"
 	"github.com/IlnurShafikov/book-of-coins/pkg/datatransfer/dto/step"
 	"github.com/IlnurShafikov/book-of-coins/pkg/manager"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -63,7 +64,6 @@ func TestEnterGame(t *testing.T) {
 
 // TestAllGameMods tests all game to ensure they can be processed without errors.
 func TestAllGameMods(t *testing.T) {
-
 	gameManager, err := manager.NewGameManager()
 	require.NoError(t, err)
 
@@ -111,6 +111,9 @@ func TestGameManager_GetRoundResult_Payout(t *testing.T) {
 
 // calculateRawTotalWin calculates the total win from the internal game result
 // before it's been transformed or scaled by bet value.
+// The total win of every phase is cumulative, so it is taken from the last executed
+// phase: the respins of the last free spin, the last free spin, the respins of the
+// base spin or the base spin itself.
 //
 // Parameters:
 //   - roundRes: the internal round result from the game engine
@@ -118,15 +121,26 @@ func TestGameManager_GetRoundResult_Payout(t *testing.T) {
 // Returns:
 //   - total win amount (in base units, not scaled by bet)
 func calculateRawTotalWin(roundRes *result.Round) uint64 {
-	var totalWin uint64
+	totalWin := roundRes.BasePhase.TotalWin()
 
-	totalWin += roundRes.BasePhase.TotalWin()
+	if reSpins := roundRes.BasePhase.ReSpins; len(reSpins) > 0 {
+		totalWin = reSpins[len(reSpins)-1].TotalWin()
+	}
+
+	for _, freeSpin := range roundRes.FreePhase {
+		totalWin = freeSpin.TotalWin()
+
+		if reSpins := freeSpin.ReSpins; len(reSpins) > 0 {
+			totalWin = reSpins[len(reSpins)-1].TotalWin()
+		}
+	}
 
 	return totalWin
 }
 
 // calculateTransferTotalWin calculates the total win from the transformed
 // client-facing steps. This value should be scaled by the bet value.
+// The total win of a step is cumulative, so it is taken from the last step.
 //
 // Parameters:
 //   - allSteps: slice of transformed steps sent to the client
@@ -134,13 +148,11 @@ func calculateRawTotalWin(roundRes *result.Round) uint64 {
 // Returns:
 //   - total win amount (already scaled by bet value)
 func calculateTransferTotalWin(allSteps []*step.Step) uint64 {
-	var totalWin uint64
-
-	for _, step := range allSteps {
-		totalWin += step.TotalWin
+	if len(allSteps) == 0 {
+		return 0
 	}
 
-	return totalWin
+	return allSteps[len(allSteps)-1].TotalWin
 }
 
 // seed generates a non-zero seed based on the current time.

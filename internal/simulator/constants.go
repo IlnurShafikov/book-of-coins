@@ -20,9 +20,9 @@ const (
 	// DefaultBetValue is the default bet amount per spin (in the game's smallest unit).
 	DefaultBetValue = 1
 
-	// DefaultSimpleCostMultiplier is the cost multiplier used for the simple game mode.
-	// TODO: set a unique value for each game (usually taken from the general config).
-	DefaultSimpleCostMultiplier = 5
+	// DefaultSimpleCostMultiplier is the cost multiplier of the simple game mode: 10 paylines
+	// with a line bet of 1 unit. It scales the win range buckets of the report.
+	DefaultSimpleCostMultiplier = 10
 
 	// OutputDir is the directory where simulation result files are written.
 	OutputDir = "out"

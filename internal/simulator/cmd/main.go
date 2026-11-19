@@ -1,3 +1,5 @@
+// Command simulator runs Monte Carlo simulations of the game to verify RTP and volatility
+// and writes the reports into the out directory.
 package main
 
 import (
@@ -7,6 +9,8 @@ import (
 	"github.com/IlnurShafikov/book-of-coins/internal/simulator/runners"
 )
 
+// main parses the CLI flags and runs the simulation.
+// A failed simulation terminates the program with a non-zero exit code.
 func main() {
 	cfg := simulator.ParseConfigs()
 

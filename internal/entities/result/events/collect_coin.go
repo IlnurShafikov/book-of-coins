@@ -6,7 +6,8 @@ import "github.com/IlnurShafikov/book-of-coins/internal/entities/coins"
 // This event occurs when coin symbols are gathered for payout calculation.
 type CollectCoinEvent struct {
 	// Type is the event type identifier
-	Type  Type             `json:"type"`
+	Type Type `json:"type"`
+	// Coins are the coins that were collected, with their positions and values
 	Coins coins.CoinResult `json:"targets"`
 }
 
